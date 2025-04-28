@@ -78,6 +78,32 @@ export default function Home() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  function generatePrompt(diagnosisData: any) {
+    if (!diagnosisData || !diagnosisData.pluto || !diagnosisData.nodes || !diagnosisData.nodeRulers) {
+      console.error('診断データが不完全です:', diagnosisData);
+      return '';
+    }
+
+    return `
+あなたは進化占星術（Evolutionary Astrology）の専門家です。
+以下のデータをもとに、クライアントの魂の進化ストーリーを作成してください。
+
+【データ】
+- Pluto（冥王星）: サイン=${diagnosisData.pluto.sign}、度数=${diagnosisData.pluto.degree}
+- Pluto Polarity Point: サイン=${diagnosisData.plutoPolarityPoint.sign}、度数=${diagnosisData.plutoPolarityPoint.degree}
+- North Node（ノースノード）: サイン=${diagnosisData.nodes.north.sign}、度数=${diagnosisData.nodes.north.degree}
+- South Node（サウスノード）: サイン=${diagnosisData.nodes.south.sign}、度数=${diagnosisData.nodes.south.degree}
+- North Node支配星: 惑星=${diagnosisData.nodeRulers.north.planet}、サイン=${diagnosisData.nodeRulers.north.sign}、度数=${diagnosisData.nodeRulers.north.degree}
+
+【出力フォーマット】
+1. 過去の魂テーマ（300字程度）
+2. 今生の進化テーマ（300字程度）
+3. 魂の根源的な成長動機（300字程度）
+4. 総合メッセージ（300字程度）
+5. 成長キーワードタグ（3〜5個）
+`;
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormStatus({ loading: true, success: false, error: null, result: null, story: null });
@@ -140,33 +166,12 @@ export default function Home() {
         hasNNRuler
       });
       
-      if (!hasPluto || !hasPPP || !hasNorthNode || !hasSouthNode || !hasNNRuler) {
-        console.error('必要なデータが不足しています:', {
-          hasPluto,
-          hasPPP,
-          hasNorthNode,
-          hasSouthNode,
-          hasNNRuler
-        });
-        
+      const promptTemplate = generatePrompt(result);
+      
+      if (!promptTemplate) {
+        console.error('プロンプトの生成に失敗しました。データが不完全です。');
         throw new Error('占星データの一部が取得できませんでした。もう一度お試しください。');
       }
-      
-      const promptTemplate = `あなたは進化占星術（Evolutionary Astrology）の専門家です。
-以下のデータをもとに、クライアントの魂の進化ストーリーを作成してください。
-【データ】
-- Pluto: サイン=${result.pluto.sign}、度数=${result.pluto.degree}
-- Pluto Polarity Point: サイン=${result.plutoPolarityPoint.sign}、度数=${result.plutoPolarityPoint.degree}
-- North Node: サイン=${northNode.sign}、度数=${northNode.degree}
-- South Node: サイン=${southNode.sign}、度数=${southNode.degree}
-- North Node支配星: 惑星=${northNodeRuler.planet}、サイン=${northNodeRuler.sign}、度数=${northNodeRuler.degree}
-
-【出力フォーマット】
-1. 過去の魂テーマ（300字程度）
-2. 今生の進化テーマ（300字程度）
-3. 魂の根源的な成長動機（300字程度）
-4. 総合メッセージ（300字程度）
-5. 成長キーワードタグ（3〜5個）`;
 
       const storyResponse = await fetch('/api/generateStory', {
         method: 'POST',
