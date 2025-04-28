@@ -133,6 +133,12 @@ export default function Home() {
 
   return (
     <>
+      <Head>
+        <title>Stellavia - 魂の進化を導く占星体験</title>
+        <meta name="description" content="Stellaviaは魂の進化をサポートする占星術の新しいアプローチを提供します。自己探求と成長のためのツールとしての占星術を体験してください。" />
+        <meta charSet="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      </Head>
       <header className="site-header">
         <div className="container">
           <div className="logo">Stellavia</div>
