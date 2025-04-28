@@ -5,6 +5,11 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  distDir: 'out',
+  experimental: {
+    appDir: false,
+  },
+  trailingSlash: true,
 };
 
 module.exports = nextConfig;
