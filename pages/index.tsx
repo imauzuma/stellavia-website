@@ -174,14 +174,12 @@ export default function Home() {
               <div className="form-group">
                 <label htmlFor="birthtime">出生時間</label>
                 <input 
-                  type="text" 
+                  type="time" 
                   id="birthtime" 
                   name="birthtime" 
                   value={formData.birthtime}
                   onChange={handleInputChange}
                   required 
-                  placeholder="例: 12:00"
-                  pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]"
                 />
               </div>
               
