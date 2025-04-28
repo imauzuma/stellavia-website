@@ -39,7 +39,8 @@
 
 .form-group input[type="text"],
 .form-group input[type="date"],
-.form-group input[type="time"] {
+.form-group input[type="time"],
+.form-group select {
     width: 100%;
     padding: 12px 15px;
     border-radius: 8px;
@@ -48,6 +49,15 @@
     color: var(--color-silver);
     font-family: var(--font-sans);
     transition: all 0.3s ease;
+}
+
+.form-group select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(201, 178, 119, 0.8)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 16px;
+    padding-right: 40px;
 }
 
 .form-group input:focus {
@@ -119,6 +129,19 @@
     border-radius: 10px;
     border: 1px solid rgba(201, 178, 119, 0.3);
     text-align: left;
+}
+
+.api-response-preview {
+    background-color: rgba(18, 18, 18, 0.8);
+    padding: 15px;
+    border-radius: 8px;
+    color: var(--color-silver);
+    font-family: monospace;
+    font-size: 0.9rem;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    max-height: 300px;
+    overflow-y: auto;
 }
 
 .diagnosis-result h3 {

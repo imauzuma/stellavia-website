@@ -1,12 +1,66 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Script from 'next/script';
+
+const PREFECTURE_DATA = [
+  { name: '北海道', latitude: 43.0642, longitude: 141.3469 },
+  { name: '青森県', latitude: 40.8244, longitude: 140.7400 },
+  { name: '岩手県', latitude: 39.7036, longitude: 141.1527 },
+  { name: '宮城県', latitude: 38.2688, longitude: 140.8721 },
+  { name: '秋田県', latitude: 39.7186, longitude: 140.1024 },
+  { name: '山形県', latitude: 38.2404, longitude: 140.3633 },
+  { name: '福島県', latitude: 37.7500, longitude: 140.4678 },
+  { name: '茨城県', latitude: 36.3418, longitude: 140.4467 },
+  { name: '栃木県', latitude: 36.5657, longitude: 139.8836 },
+  { name: '群馬県', latitude: 36.3911, longitude: 139.0608 },
+  { name: '埼玉県', latitude: 35.8569, longitude: 139.6489 },
+  { name: '千葉県', latitude: 35.6073, longitude: 140.1063 },
+  { name: '東京都', latitude: 35.6895, longitude: 139.6917 },
+  { name: '神奈川県', latitude: 35.4475, longitude: 139.6425 },
+  { name: '新潟県', latitude: 37.9024, longitude: 139.0236 },
+  { name: '富山県', latitude: 36.6953, longitude: 137.2113 },
+  { name: '石川県', latitude: 36.5946, longitude: 136.6256 },
+  { name: '福井県', latitude: 36.0652, longitude: 136.2219 },
+  { name: '山梨県', latitude: 35.6641, longitude: 138.5684 },
+  { name: '長野県', latitude: 36.6513, longitude: 138.1812 },
+  { name: '岐阜県', latitude: 35.3911, longitude: 136.7220 },
+  { name: '静岡県', latitude: 34.9769, longitude: 138.3831 },
+  { name: '愛知県', latitude: 35.1802, longitude: 136.9066 },
+  { name: '三重県', latitude: 34.7303, longitude: 136.5086 },
+  { name: '滋賀県', latitude: 35.0045, longitude: 135.8686 },
+  { name: '京都府', latitude: 35.0116, longitude: 135.7681 },
+  { name: '大阪府', latitude: 34.6937, longitude: 135.5023 },
+  { name: '兵庫県', latitude: 34.6913, longitude: 135.1830 },
+  { name: '奈良県', latitude: 34.6851, longitude: 135.8050 },
+  { name: '和歌山県', latitude: 34.2261, longitude: 135.1675 },
+  { name: '鳥取県', latitude: 35.5039, longitude: 134.2381 },
+  { name: '島根県', latitude: 35.4723, longitude: 133.0505 },
+  { name: '岡山県', latitude: 34.6618, longitude: 133.9344 },
+  { name: '広島県', latitude: 34.3966, longitude: 132.4596 },
+  { name: '山口県', latitude: 34.1859, longitude: 131.4706 },
+  { name: '徳島県', latitude: 34.0658, longitude: 134.5593 },
+  { name: '香川県', latitude: 34.3401, longitude: 134.0434 },
+  { name: '愛媛県', latitude: 33.8416, longitude: 132.7661 },
+  { name: '高知県', latitude: 33.5597, longitude: 133.5311 },
+  { name: '福岡県', latitude: 33.6064, longitude: 130.4183 },
+  { name: '佐賀県', latitude: 33.2494, longitude: 130.2988 },
+  { name: '長崎県', latitude: 32.7448, longitude: 129.8737 },
+  { name: '熊本県', latitude: 32.7898, longitude: 130.7417 },
+  { name: '大分県', latitude: 33.2382, longitude: 131.6125 },
+  { name: '宮崎県', latitude: 31.9111, longitude: 131.4239 },
+  { name: '鹿児島県', latitude: 31.5602, longitude: 130.5581 },
+  { name: '沖縄県', latitude: 26.2124, longitude: 127.6809 }
+];
+
+const TOKYO_INDEX = PREFECTURE_DATA.findIndex(pref => pref.name === '東京都');
+
+const JST_TIMEZONE_OFFSET = 9;
 
 export default function Home() {
   const [formData, setFormData] = useState({
     nickname: '',
     birthdate: '',
-    birthplace: '',
+    birthplace: '東京都',
     birthtime: '',
     gender: 'male'
   });
@@ -18,7 +72,7 @@ export default function Home() {
     result: null as any
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -28,12 +82,27 @@ export default function Home() {
     setFormStatus({ loading: true, success: false, error: null, result: null });
 
     try {
-      const response = await fetch('/api/stellavia/chart-calculation', {
+      const birthTime = formData.birthtime || '12:00';
+      
+      const selectedPrefecture = PREFECTURE_DATA.find(pref => pref.name === formData.birthplace) || 
+                                PREFECTURE_DATA[TOKYO_INDEX];
+      
+      const requestData = {
+        birthDate: formData.birthdate,
+        birthTime: birthTime,
+        latitude: selectedPrefecture.latitude,
+        longitude: selectedPrefecture.longitude,
+        timezoneOffset: JST_TIMEZONE_OFFSET
+      };
+
+      console.log('Sending request to API:', requestData);
+
+      const response = await fetch('https://stellavia-horoscope-api.onrender.com/api/chart', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(requestData),
       });
 
       if (!response.ok) {
@@ -42,6 +111,9 @@ export default function Home() {
       }
 
       const result = await response.json();
+      
+      console.log('API Response:', result);
+      
       setFormStatus({
         loading: false,
         success: true,
@@ -49,6 +121,7 @@ export default function Home() {
         result
       });
     } catch (error) {
+      console.error('API Error:', error);
       setFormStatus({
         loading: false,
         success: false,
@@ -134,14 +207,13 @@ export default function Home() {
           <div className="diagnosis-form-container">
             <form className="diagnosis-form" onSubmit={handleSubmit}>
               <div className="form-group">
-                <label htmlFor="nickname">ニックネーム</label>
+                <label htmlFor="nickname">ニックネーム（任意）</label>
                 <input 
                   type="text" 
                   id="nickname" 
                   name="nickname" 
                   value={formData.nickname}
                   onChange={handleInputChange}
-                  required 
                   placeholder="あなたのニックネーム"
                 />
               </div>
@@ -159,27 +231,31 @@ export default function Home() {
               </div>
               
               <div className="form-group">
-                <label htmlFor="birthplace">出生地</label>
-                <input 
-                  type="text" 
-                  id="birthplace" 
-                  name="birthplace" 
+                <label htmlFor="birthplace">出生地（都道府県）</label>
+                <select
+                  id="birthplace"
+                  name="birthplace"
                   value={formData.birthplace}
                   onChange={handleInputChange}
-                  required 
-                  placeholder="例: 東京都新宿区"
-                />
+                  required
+                  className="prefecture-select"
+                >
+                  {PREFECTURE_DATA.map((prefecture) => (
+                    <option key={prefecture.name} value={prefecture.name}>
+                      {prefecture.name}
+                    </option>
+                  ))}
+                </select>
               </div>
               
               <div className="form-group">
-                <label htmlFor="birthtime">出生時間</label>
+                <label htmlFor="birthtime">出生時間（任意、未入力時は12:00）</label>
                 <input 
                   type="time" 
                   id="birthtime" 
                   name="birthtime" 
                   value={formData.birthtime}
                   onChange={handleInputChange}
-                  required 
                 />
               </div>
               
@@ -242,24 +318,11 @@ export default function Home() {
                   <p>あなたの星の配置から、以下の特徴が読み取れます：</p>
                   <div className="planet-positions">
                     <h4>主要天体の位置</h4>
-                    <ul>
-                      {Object.entries(formStatus.result.planetPositions).map(([planet, position]: [string, any]) => (
-                        <li key={planet}>
-                          <strong>{planet}:</strong> {position.sign} {position.degree}°
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  
-                  <div className="aspects">
-                    <h4>重要なアスペクト</h4>
-                    <ul>
-                      {formStatus.result.aspects.map((aspect: any, index: number) => (
-                        <li key={index}>
-                          {aspect.planet1} - {aspect.planet2}: {aspect.type} ({aspect.orb}°)
-                        </li>
-                      ))}
-                    </ul>
+                    <p>APIからのレスポンスデータがコンソールに出力されました。</p>
+                    <p>ブラウザの開発者ツール（F12）を開いて、コンソールタブで確認してください。</p>
+                    <pre className="api-response-preview">
+                      {JSON.stringify(formStatus.result, null, 2).substring(0, 300)}...
+                    </pre>
                   </div>
                 </div>
               </div>
