@@ -69,7 +69,8 @@ export default function Home() {
     loading: false,
     success: false,
     error: null as string | null,
-    result: null as any
+    result: null as any,
+    story: null as string | null
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -79,7 +80,7 @@ export default function Home() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormStatus({ loading: true, success: false, error: null, result: null });
+    setFormStatus({ loading: true, success: false, error: null, result: null, story: null });
 
     try {
       const birthTime = formData.birthtime || '12:00';
@@ -114,19 +115,63 @@ export default function Home() {
       
       console.log('API Response:', result);
       
+      const promptTemplate = `あなたは進化占星術（Evolutionary Astrology）の専門家です。
+以下のデータをもとに、クライアントの魂の進化ストーリーを作成してください。
+【データ】
+- Pluto: サイン=${result.pluto.sign}、度数=${result.pluto.degree}
+- Pluto Polarity Point: サイン=${result.plutoPolarityPoint.sign}、度数=${result.plutoPolarityPoint.degree}
+- North Node: サイン=${result.northNode.sign}、度数=${result.northNode.degree}
+- South Node: サイン=${result.southNode.sign}、度数=${result.southNode.degree}
+- North Node支配星: 惑星=${result.northNodeRuler.planet}、サイン=${result.northNodeRuler.sign}、度数=${result.northNodeRuler.degree}
+
+【出力フォーマット】
+1. 過去の魂テーマ（300字程度）
+2. 今生の進化テーマ（300字程度）
+3. 魂の根源的な成長動機（300字程度）
+4. 総合メッセージ（300字程度）
+5. 成長キーワードタグ（3〜5個）`;
+
+      const storyResponse = await fetch('/api/generateStory', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ promptText: promptTemplate }),
+      });
+
+      if (!storyResponse.ok) {
+        const errorData = await storyResponse.json();
+        throw new Error(errorData.message || 'ストーリー生成中にエラーが発生しました');
+      }
+
+      const storyData = await storyResponse.json();
+      
+      console.log('Story Response:', storyData);
+      
       setFormStatus({
         loading: false,
         success: true,
         error: null,
-        result
+        result,
+        story: storyData.story
       });
+
+      setTimeout(() => {
+        const resultElement = document.getElementById('diagnosisResult');
+        if (resultElement) {
+          resultElement.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
     } catch (error) {
       console.error('API Error:', error);
+      alert(error instanceof Error ? error.message : '処理中にエラーが発生しました');
+      
       setFormStatus({
         loading: false,
         success: false,
-        error: error instanceof Error ? error.message : '診断処理中にエラーが発生しました',
-        result: null
+        error: error instanceof Error ? error.message : '処理中にエラーが発生しました',
+        result: null,
+        story: null
       });
     }
   };
@@ -318,18 +363,35 @@ export default function Home() {
             )}
             
             {formStatus.success && formStatus.result && (
-              <div className="diagnosis-result">
+              <div className="diagnosis-result" id="diagnosisResult">
                 <h3>診断結果</h3>
                 <div className="result-content">
                   <p>あなたの星の配置から、以下の特徴が読み取れます：</p>
                   <div className="planet-positions">
                     <h4>主要天体の位置</h4>
-                    <p>APIからのレスポンスデータがコンソールに出力されました。</p>
-                    <p>ブラウザの開発者ツール（F12）を開いて、コンソールタブで確認してください。</p>
-                    <pre className="api-response-preview">
-                      {JSON.stringify(formStatus.result, null, 2).substring(0, 300)}...
-                    </pre>
+                    <div className="planet-data">
+                      <p><strong>冥王星 (Pluto):</strong> {formStatus.result.pluto.sign} {formStatus.result.pluto.degree}°</p>
+                      <p><strong>冥王星極性点 (PPP):</strong> {formStatus.result.plutoPolarityPoint.sign} {formStatus.result.plutoPolarityPoint.degree}°</p>
+                      <p><strong>ノースノード:</strong> {formStatus.result.northNode.sign} {formStatus.result.northNode.degree}°</p>
+                      <p><strong>サウスノード:</strong> {formStatus.result.southNode.sign} {formStatus.result.southNode.degree}°</p>
+                      <p><strong>ノースノード支配星:</strong> {formStatus.result.northNodeRuler.planet} ({formStatus.result.northNodeRuler.sign} {formStatus.result.northNodeRuler.degree}°)</p>
+                    </div>
                   </div>
+                  
+                  {formStatus.story && (
+                    <div className="soul-evolution-story">
+                      <h4>魂の進化ストーリー</h4>
+                      <div className="story-content">
+                        {formStatus.story}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {!formStatus.story && formStatus.loading && (
+                    <div className="loading-story">
+                      <p>魂の進化ストーリーを生成中です...</p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
