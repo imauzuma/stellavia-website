@@ -113,14 +113,32 @@ export default function Home() {
 
       const result = await response.json();
       
-      console.log('Render APIから取得した診断データ:', result);
+      console.log('Render APIから取得した診断データ:', JSON.stringify(result, null, 2));
+      console.log('データ構造の確認:');
+      console.log('- result.pluto:', result.pluto);
+      console.log('- result.plutoPolarityPoint:', result.plutoPolarityPoint);
+      console.log('- result.nodes:', result.nodes);
+      console.log('- result.northNode:', result.northNode);
+      console.log('- result.southNode:', result.southNode);
+      console.log('- result.northNodeRuler:', result.northNodeRuler);
+      
+      const northNode = result.northNode || (result.nodes && result.nodes.northNode);
+      const southNode = result.southNode || (result.nodes && result.nodes.southNode);
+      const northNodeRuler = result.northNodeRuler || (result.nodes && result.nodes.ruler);
       
       const hasPluto = result && result.pluto && result.pluto.sign && result.pluto.degree;
       const hasPPP = result && result.plutoPolarityPoint && result.plutoPolarityPoint.sign && result.plutoPolarityPoint.degree;
-      const hasNorthNode = result && result.northNode && result.northNode.sign && result.northNode.degree;
-      const hasSouthNode = result && result.southNode && result.southNode.sign && result.southNode.degree;
-      const hasNNRuler = result && result.northNodeRuler && result.northNodeRuler.planet && 
-                         result.northNodeRuler.sign && result.northNodeRuler.degree;
+      const hasNorthNode = northNode && northNode.sign && northNode.degree;
+      const hasSouthNode = southNode && southNode.sign && southNode.degree;
+      const hasNNRuler = northNodeRuler && northNodeRuler.planet && northNodeRuler.sign && northNodeRuler.degree;
+      
+      console.log('データ存在チェック結果:', {
+        hasPluto,
+        hasPPP,
+        hasNorthNode,
+        hasSouthNode,
+        hasNNRuler
+      });
       
       if (!hasPluto || !hasPPP || !hasNorthNode || !hasSouthNode || !hasNNRuler) {
         console.error('必要なデータが不足しています:', {
@@ -139,9 +157,9 @@ export default function Home() {
 【データ】
 - Pluto: サイン=${result.pluto.sign}、度数=${result.pluto.degree}
 - Pluto Polarity Point: サイン=${result.plutoPolarityPoint.sign}、度数=${result.plutoPolarityPoint.degree}
-- North Node: サイン=${result.northNode.sign}、度数=${result.northNode.degree}
-- South Node: サイン=${result.southNode.sign}、度数=${result.southNode.degree}
-- North Node支配星: 惑星=${result.northNodeRuler.planet}、サイン=${result.northNodeRuler.sign}、度数=${result.northNodeRuler.degree}
+- North Node: サイン=${northNode.sign}、度数=${northNode.degree}
+- South Node: サイン=${southNode.sign}、度数=${southNode.degree}
+- North Node支配星: 惑星=${northNodeRuler.planet}、サイン=${northNodeRuler.sign}、度数=${northNodeRuler.degree}
 
 【出力フォーマット】
 1. 過去の魂テーマ（300字程度）
