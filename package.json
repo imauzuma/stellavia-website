@@ -4,7 +4,7 @@
   "description": "Stellavia - 魂の進化を導く占星体験",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && ([ -d .next ] && cp -r .next/. out/ || true)",
     "start": "next start",
     "lint": "next lint"
   },
