@@ -140,19 +140,21 @@ export default function Home() {
         hasNNRuler
       });
       
-      if (!hasPluto || !hasPPP || !hasNorthNode || !hasSouthNode || !hasNNRuler) {
-        console.error('必要なデータが不足しています:', {
+      if (!hasPluto || !hasPPP) {
+        console.error('必須データが不足しています:', {
           hasPluto,
-          hasPPP,
-          hasNorthNode,
-          hasSouthNode,
-          hasNNRuler
+          hasPPP
         });
         
-        throw new Error('占星データの一部が取得できませんでした。もう一度お試しください。');
+        throw new Error('占星データの取得に失敗しました。もう一度お試しください。');
       }
       
-      const promptTemplate = `あなたは進化占星術（Evolutionary Astrology）の専門家です。
+      const hasFullData = hasNorthNode && hasSouthNode && hasNNRuler;
+      
+      let promptTemplate = '';
+      
+      if (hasFullData) {
+        promptTemplate = `あなたは進化占星術（Evolutionary Astrology）の専門家です。
 以下のデータをもとに、クライアントの魂の進化ストーリーを作成してください。
 【データ】
 - Pluto: サイン=${result.pluto.sign}、度数=${result.pluto.degree}
@@ -167,6 +169,22 @@ export default function Home() {
 3. 魂の根源的な成長動機（300字程度）
 4. 総合メッセージ（300字程度）
 5. 成長キーワードタグ（3〜5個）`;
+      } else {
+        promptTemplate = `あなたは進化占星術（Evolutionary Astrology）の専門家です。
+以下の限定的なデータをもとに、クライアントの魂の進化ストーリーを作成してください。
+【データ】
+- Pluto: サイン=${result.pluto.sign}、度数=${result.pluto.degree}
+- Pluto Polarity Point: サイン=${result.plutoPolarityPoint.sign}、度数=${result.plutoPolarityPoint.degree}
+
+【出力フォーマット】
+1. 過去の魂テーマ（300字程度）
+2. 今生の進化テーマ（300字程度）
+3. 魂の根源的な成長動機（300字程度）
+4. 総合メッセージ（300字程度）
+5. 成長キーワードタグ（3〜5個）
+
+※ノードデータが利用できないため、冥王星と冥王星極性点のみに基づいた解釈となります。`;
+      }
 
       const storyResponse = await fetch('/api/generateStory', {
         method: 'POST',
@@ -417,7 +435,7 @@ export default function Home() {
                   
                   {formStatus.story && (
                     <div className="soul-evolution-story">
-                      <h4>魂の進化ストーリー</h4>
+                      <h4>魂の進化ストーリー {!hasFullData && <span className="limited-data">(限定データに基づく解釈)</span>}</h4>
                       <div className="story-content">
                         {formStatus.story}
                       </div>
