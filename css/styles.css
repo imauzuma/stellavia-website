@@ -462,3 +462,48 @@ section {
         cursor: pointer;
     }
 }
+
+/* ===== 魂の進化ストーリー ===== */
+.soul-evolution-story {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.soul-evolution-story h4 {
+  margin-bottom: 1rem;
+  color: #e6c4ff;
+  font-size: 1.4rem;
+}
+
+.story-content {
+  white-space: pre-line;
+  line-height: 1.6;
+}
+
+.planet-data {
+  margin-bottom: 1.5rem;
+}
+
+.planet-data p {
+  margin-bottom: 0.5rem;
+}
+
+.loading-story {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  text-align: center;
+  font-style: italic;
+  color: #e6c4ff;
+}
+
+.diagnosis-result {
+  scroll-margin-top: 2rem;
+}
+
+.result-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
