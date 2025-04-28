@@ -113,7 +113,26 @@ export default function Home() {
 
       const result = await response.json();
       
-      console.log('API Response:', result);
+      console.log('Render APIから取得した診断データ:', result);
+      
+      const hasPluto = result && result.pluto && result.pluto.sign && result.pluto.degree;
+      const hasPPP = result && result.plutoPolarityPoint && result.plutoPolarityPoint.sign && result.plutoPolarityPoint.degree;
+      const hasNorthNode = result && result.northNode && result.northNode.sign && result.northNode.degree;
+      const hasSouthNode = result && result.southNode && result.southNode.sign && result.southNode.degree;
+      const hasNNRuler = result && result.northNodeRuler && result.northNodeRuler.planet && 
+                         result.northNodeRuler.sign && result.northNodeRuler.degree;
+      
+      if (!hasPluto || !hasPPP || !hasNorthNode || !hasSouthNode || !hasNNRuler) {
+        console.error('必要なデータが不足しています:', {
+          hasPluto,
+          hasPPP,
+          hasNorthNode,
+          hasSouthNode,
+          hasNNRuler
+        });
+        
+        throw new Error('占星データの一部が取得できませんでした。もう一度お試しください。');
+      }
       
       const promptTemplate = `あなたは進化占星術（Evolutionary Astrology）の専門家です。
 以下のデータをもとに、クライアントの魂の進化ストーリーを作成してください。
