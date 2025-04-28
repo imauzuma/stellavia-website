@@ -70,7 +70,8 @@ export default function Home() {
     success: false,
     error: null as string | null,
     result: null as any,
-    story: null as string | null
+    story: null as string | null,
+    hasFullData: true
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -80,7 +81,7 @@ export default function Home() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormStatus({ loading: true, success: false, error: null, result: null, story: null });
+    setFormStatus({ loading: true, success: false, error: null, result: null, story: null, hasFullData: true });
 
     try {
       const birthTime = formData.birthtime || '12:00';
@@ -208,7 +209,8 @@ export default function Home() {
         success: true,
         error: null,
         result,
-        story: storyData.story
+        story: storyData.story,
+        hasFullData
       });
 
       setTimeout(() => {
@@ -226,7 +228,8 @@ export default function Home() {
         success: false,
         error: error instanceof Error ? error.message : '処理中にエラーが発生しました',
         result: null,
-        story: null
+        story: null,
+        hasFullData: true
       });
     }
   };
@@ -435,7 +438,7 @@ export default function Home() {
                   
                   {formStatus.story && (
                     <div className="soul-evolution-story">
-                      <h4>魂の進化ストーリー {!hasFullData && <span className="limited-data">(限定データに基づく解釈)</span>}</h4>
+                      <h4>魂の進化ストーリー {!formStatus.hasFullData && <span className="limited-data">(限定データに基づく解釈)</span>}</h4>
                       <div className="story-content">
                         {formStatus.story}
                       </div>
